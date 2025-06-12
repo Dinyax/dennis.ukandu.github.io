@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dennis Ukandu</title>
+    <style>
+        .scramble-char {
+    transition: all 0.2s ease;
+    display: inline; 
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.4;
+            cursor: crosshair;
+            overflow-x: hidden;
+        }
+
+        /* INTRO PAGE STYLES */
+        .intro-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .intro-page.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    pointer-events: none; /* Prevents clicks from interacting with the video */
+}
+
+        @keyframes drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        .intro-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .intro-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .intro-title {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: 12px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: fadeInUp 1.5s ease;
+        }
+
+        .intro-subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            letter-spacing: 3px;
+            text-transform: lowercase;
+            margin-bottom: 60px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            animation: fadeInUp 1.5s ease 0.3s both;
+        }
+
+        .enter-btn {
+            background: transparent;
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 15px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1.5s ease 0.6s both;
+        }
+
+        .enter-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SHARED STYLES */
+        .page {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
+        }
+        .page.visible {
+            opacity: 1;
+            visibility: visible;
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: transparent;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            border-color: #fff;
+            background: #fff;
+            color: #000;
+        }
+
+        /* PORTFOLIO PAGE STYLES */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 8px;
+            color: #fff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 2px;
+            text-transform: lowercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+
+        .project {
+            border: 1px solid #222;
+            background: #111;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project:hover {
+            border-color: #444;
+            transform: translateY(-2px);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 250px; /* or your preferred height */
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #222;
+            position: relative;
+            overflow: hidden; /* Ensures cropping */
+        }
+
+        .project-image img,
+        .project-image video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Crops to fill the frame */
+            display: block;
+        }
+
+        .project-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /*background: linear-gradient(45deg, transparent 49%, #333 50%, transparent 51%);*/
+            opacity: 0.1;
+        }
+
+        .placeholder {
+            color: #444;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .project-info {
+            padding: 20px;
+        }
+
+        .project-title {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .project-year {
+            color: #666;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .project-description {
+            font-size: 0.85rem;
+            color: #999;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .enter-project-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .enter-project-btn:hover {
+            border-color: #fff;
+            background: #fff;
+            color: #000;
+        }
+
+        .about {
+            border-top: 1px solid #333;
+            padding-top: 40px;
+            text-align: center;
+        }
+
+        .about h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        .bio {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .education {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        footer {
+            margin-top: 80px;
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid #222;
+        }
+
+        .contact {
+            font-size: 0.8rem;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        /* PROJECT PAGE STYLES */
+        .project-page {
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .project-header {
+            text-align: center;
+            margin-bottom: 60px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 40px;
+        }
+
+        .project-page h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .project-page .year {
+            font-size: 1rem;
+            color: #666;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .project-page .description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .media-item {
+            background: #111;
+            border: 1px solid #222;
+            overflow: hidden;
+        }
+
+        .media-item img,
+        .media-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .media-caption {
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #222;
+        }
+
+        .two-column {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .video-container {
+            position: relative;
+            height: 400px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-placeholder {
+            color: #444;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .project-details {
+            background: #111;
+            border: 1px solid #222;
+            padding: 40px;
+            margin-bottom: 40px;
+            flex: 1 1 0; /* Add this line */
+            min-width: 0; /* Prevents overflow on small screens */
+        }
+
+        .image-frame {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            /* Remove width and height! */
+        }
+
+        .project-details h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .project-details p {
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .glitch {
+            position: relative;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* MOBILE STYLES */
+        @media (max-width: 768px) {
+            .intro-title {
+                font-size: 2.5rem;
+                letter-spacing: 6px;
+            }
+            
+            .intro-subtitle {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+            
+            .enter-btn {
+                padding: 12px 30px;
+                font-size: 0.9rem;
+            }
+            
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .project-page h1 {
+                font-size: 2rem;
+                letter-spacing: 3px;
+            }
+
+            .back-btn {
+                top: 20px;
+                left: 20px;
+            }
+            }
+            /* Make portfolio page only as tall as its content */
+            #portfolioPage {
+                min-height: 0 !important;
+                height: auto !important;
+                padding-bottom: 0 !important;
+                margin-bottom: 0 !important;
+            }
+            .container {
+                padding-bottom: 0 !important;
+                margin-bottom: 0 !important;
+            }
+            footer {
+                margin-bottom: 0 !important;
+            }
+            /* Only the visible page takes up full height */
+            .page {
+                display: none;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.8s ease 0.3s, visibility 0.8s ease 0.3s;
+            }
+
+            .page.visible {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+            }
+            /* Two-column layout */
+            .project-main {
+                display: flex;
+                gap: 40px;
+                align-items: flex-start;
+                margin-bottom: 60px;
+            }
+            .media-sequence {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                max-width: 450px;
+                flex-shrink: 0;
+            }
+            .media-item img,
+            .media-item video {
+                width: 100%;
+                max-width: 100%;
+                display: block;
+                cursor: pointer;
+                border: 2px solid #333;
+                background: #1a1a1a;
+                border-radius: 4px;
+                transition: box-shadow 0.2s;
+            }
+            .media-item img:hover,
+            .media-item video:hover {
+                box-shadow: 0 0 0 4px #fff2, 0 4px 32px #000a;
+            }
+            .project-details {
+                flex: 1 1 0;
+                min-width: 0;
+            }
+
+            /* Lightbox styles */
+            #lightbox {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(10,10,10,0.96);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: row;
+            }
+            #lightbox-bg {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(10,10,10,0.96);
+                z-index: 1;
+            }
+            #lightbox-content {
+                position: relative;
+                z-index: 2;
+                max-width: 90vw;
+                max-height: 90vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #lightbox-content img,
+            #lightbox-content video {
+                max-width: 90vw;
+                max-height: 90vh;
+                border-radius: 6px;
+                background: #111;
+            }
+            #lightbox-left, #lightbox-right, #lightbox-close {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 3;
+                background: rgba(30,30,30,0.7);
+                color: #fff;
+                border: none;
+                font-size: 2.5rem;
+                padding: 10px 18px;
+                cursor: pointer;
+                opacity: 0.8;
+                transition: opacity 0.2s;
+            }
+            #lightbox-left { left: 30px; }
+            #lightbox-right { right: 30px; }
+            #lightbox-close {
+                top: 30px;
+                right: 30px;
+                transform: none;
+                font-size: 2rem;
+                padding: 4px 12px;
+            }
+            #lightbox-left:hover, #lightbox-right:hover, #lightbox-close:hover {
+                opacity: 1;
+            }
+            @media (max-width: 900px) {
+                .project-main {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .media-sequence {
+                    max-width: 100%;
+                }
+            }
+            .video-box {
+                background: #111;
+                border: 1px solid #222;
+                padding: 40px;
+                margin: 40px 0;
+                max-width: 100%;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            @media (min-width: 900px) {
+                .video-box {
+                    width: calc(100% - 490px); /* 490px = media-sequence max-width + gap */
+                    margin-left: auto;
+                }
+            }
+            #lightbox-content img,
+            #lightbox-content video {
+                cursor: pointer;
+            }
+
+        /* link styles */
+            a {
+                color: #b42323; 
+            }
+
+            a:hover {
+                color: #791818; /* color on hover */
+            }
+
+        /* CHINESE WHISPERS GRID STYLES */          
+        .chinese-whispers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: min-content;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .chinese-whispers-grid .landscape-frame {
+            grid-column: 1 / span 2;
+            height: 650px; 
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .chinese-whispers-grid .portrait-frame {
+            height: 750px; 
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .chinese-whispers-grid .landscape-frame img,
+        .chinese-whispers-grid .portrait-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image fills the frame and is cropped if needed */
+            display: block;
+        }
+        .cw-details {
+            grid-column: 1 / span 2;
+            background: #111;
+            border: 2px solid #333;
+            padding: 40px;
+            margin: 0;
+        }
+        /* SYNTHETIC SOUL GRID STYLES */
+        .synthetic-soul-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        .ss-details {
+            background: #111;
+            border: 2px solid #333;
+            padding: 40px;
+            margin: 0;
+        }
+        .landscape-frame {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            height: 800px; 
+        }
+        .landscape-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        /* HEDONISM BROADCASTT*/
+            .hedonism-portraits-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* or 1fr 1fr for two columns */
+                gap: 20px;
+                margin-bottom: 60px;
+            }
+
+            .hedonism-portraits-grid .media-item,
+            .hedonism-portraits-grid .project-image,
+            .hedonism-portraits-grid .video-container {
+                background: #1a1a1a;
+                border: 2px solid #333;
+                height: 800px; /* ADJUSTTOFIT */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            .hedonism-portraits-grid img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                cursor: pointer;
+            }
+</style>
+</head>
+<body>
+    <!-- INTRO PAGE -->
+    <div class="intro-page" id="introPage">
+        <video autoplay muted loop playsinline class="background-video">
+  <source src="videos/intro-alt.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+    </video>
+        <div class="intro-overlay"></div>
+        
+        <div class="intro-content">
+            <h1 class="intro-title">DENNIS UKANDU</h1>
+            <div class="intro-subtitle">digital artist / intermedia practitioner</div>
+            <button class="enter-btn" onclick="showPortfolio()">ENTER</button>
+        </div>
+    </div>
+
+    <!-- PORTFOLIO PAGE -->
+    <div class="page" id="portfolioPage">
+        <div class="container">
+            <header>
+                <h1 class="glitch" data-text="DENNIS UKANDU">DENNIS UKANDU</h1>
+                <div class="subtitle">digital artist / intermedia practitioner</div>
+            </header>
+
+            <div class="grid">
+                <div class="project" onclick="showProject('foreverfuck')">
+                    <div class="project-image">
+                        <video autoplay muted loop playsinline>
+                            <source src="videos/intro-alt.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">foreverfuck?</div>
+                        <div class="project-year">2025</div>
+                        <div class="project-description">Video installation presented in (Against) Transience 2025. Exploring themes of digital permanence; what it means for a machine to remember us.</div>
+                        <button class="enter-project-btn">ENTER PROJECT</button>
+                    </div>
+                </div>
+
+                <div class="project" onclick="showProject('chinese-whispers')">
+                    <div class="project-image">
+                        <img src="images/chinese_whispers_4.JPG" alt="Chinese Whispers Trailcam">
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">Chinese Whispers</div>
+                        <div class="project-year">2025</div>
+                        <div class="project-description"> A collaborative fashion project exploring cultural identity, heritage, and reinterpretation.</div>
+                        <button class="enter-project-btn">ENTER PROJECT</button>
+                    </div>
+                </div>
+
+                <div class="project" onclick="showProject('hypnoscrypt-initiative')">
+                    <div class="project-image">
+                        <img src="images/hypno_thumbnail.JPG" alt="Hypnoscrypt Initiative Thumbnail">
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">Hypnoscrypt Initiative</div>
+                        <div class="project-year">2024</div>
+                        <div class="project-description">An experimental non-linear narrative game exploring surveillance and state ethics in an absurdist and campy speculative digital world.</div>
+                        <button class="enter-project-btn">ENTER PROJECT</button>
+                    </div>
+                </div>
+
+                <div class="project" onclick="showProject('synthetic-soul')">
+                    <div class="project-image">
+                        <img src="images/synth_soul_main.jpg" alt="Synthetic Soul Look1">
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">Synthetic Soul</div>
+                        <div class="project-year">2023</div>
+                        <div class="project-description">Conceptual fashion project exploring posthuman identity, myth, and emotion through sci-fi-inspired design.</div>
+                        <button class="enter-project-btn">ENTER PROJECT</button>
+                    </div>
+                </div>
+
+                <div class="project" onclick="showProject('hedonism-broadcast')">
+                    <div class="project-image">
+                        <img src="images/portrait_thumbnail.png" alt="I Saw Infinity">
+                    </div>
+                    <div class="project-info">
+                        <div class="project-title">Worldwide Hedonism Broadcast</div>
+                        <div class="project-year">2021</div>
+                        <div class="project-description">An observational portrait series capturing the energy, excess, and intimacy of post-lockdown youth.</div>
+                        <button class="enter-project-btn">ENTER PROJECT</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about">
+                <h2>About</h2>
+                <div class="bio">
+                    Dennis Ukandu is a digital artist and intermedia practitioner working at the intersection of technology, identity, and speculative futures. His practice explores transhumanist themes, digital self-representation, and the construction of identity through video game avatars and virtual environments.
+                </div>
+                <div class="education" style="margin-top: 30px;">
+                    <strong>Education</strong><br>
+                    M.Phil Digital Arts and Intermedia Practices, Trinity College Dublin<br>
+                    BA Modern Languages - Russian and Spanish, Trinity College Dublin
+                </div>
+                <div class="contact" style="margin-top: 30px;">
+                    <strong>Contact</strong><br>
+                    dennis.ukandu@outlook.com <br>
+                    +353 89 988 6345
+                </div>
+            </div>
+            <footer>
+            </footer>
+        </div>
+    </div>
+
+    <!-- FOREVERFUCK PROJECT PAGE -->
+    <div class="page project-page" id="foreverfuckPage">
+        <button class="back-btn" onclick="showPortfolio()">← BACK</button>
+        <div class="container">
+            <div class="project-header">
+                <h1 class="glitch" data-text="FOREVERFUCK?">FOREVERFUCK?</h1>
+                <div class="year">2025</div>
+                <div class="description">
+                    Video installation presented in (Against) Transience 2025. A meditation on digital permanence; what it means for a machine to remember us.
+                </div>
+            </div>
+
+            <div class="media-grid">
+                <div class="media-item">
+                    <video autoplay muted loop width="100%">
+                        <source src="videos/foreverfuck_screen1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="media-caption">Screen 01 Installation — excerpt from main installation piece presented on a remote monitor as part of the exhibition.</div>
+            </div>
+
+            <div class="project-main">
+                <div class="media-sequence">
+                    <div class="media-item">
+                        <img src="images/foreverfuck2.png" alt="Project Image" data-ff-index="0">
+                    </div>
+                    <div class="media-item">
+                        <img src="images/foreverfuck8.jpg" alt="Still 2" data-ff-index="1">
+                    </div>
+                    <div class="media-item">
+                        <img src="images/foreverfuck5.jpg" alt="Still 3" data-ff-index="2">
+                    </div>
+                    <div class="media-item">
+                        <img src="images/foreverfuck4.jpg" alt="Still 4" data-ff-index="3">
+                    </div>
+                    <div class="media-item">
+                        <img src="images/foreverfuck6.jpg" alt="Still 5" data-ff-index="4">
+                    </div>
+                    <div class="media-item">
+                        <video src="videos/foreverfuck_vid.mp4" muted loop autoplay playsinline data-ff-index="5"></video>
+                    </div>
+                    <div class="media-item">
+                        <img src="images/against_transience.png" alt="Poster" data-ff-index="6">
+                    </div>
+                </div>   
+                <div class="project-details">
+                    <h3>FOREVERFUCK? | Dennis Ukandu</h3>
+                    <p><h4>Video installation.</h4></p>
+                    <p><h4>(Against) Transience 2025</h4></p>
+
+                    <p>What does it mean for a machine to remember us? To simulate closeness? To preserve desire beyond the moment it was felt?</p>
+                    <p>FOREVERFUCK? explores the uncanny persistence of human intimacy in digital form, those fleeting, private, visceral moments of sex, touch, and longing, captured, encoded, and endlessly replayed. The work assembles a fragmented collage of footage drawn from contemporary sources and online archives, both sexually explicit and non-sexual, recontextualised to examine how digital technologies disembody and distort human closeness. These are not erotic images in any traditional sense. They are digital remains. Fossils of feeling.</p>
+                    <p>In a world where memory becomes metadata and bodies become datasets, FOREVERFUCK? questions the illusion of artificial permanence. While machine learning and digital storage hint at immortality, the reality is decay: bit rot, obsolescence, loss. Yet even as the people behind these images age, vanish, or are forgotten, the files persist, glitching, mutating, repurposed.</p>
+                    <p>The installation lives in the tension between preservation and erosion, between the intimacy once felt and its hollow digital afterlife. It mourns what is lost in translation: when a gesture of closeness becomes a line of code, when memory is rendered machinic.</p>
+                    <p>Rooted in posthumanist thought, FOREVERFUCK? rejects the notion that digitisation is neutral. The screen does not simply display intimacy, it consumes it, repeats it, distorts it. What endures are echoes: the trace of a body, the flicker of a gesture, a moment looped until it loses meaning.</p>
+                    <p>What is preserved when intimacy is recorded? And what is irretrievably lost?<br></p>
+                </div>
+            </div>
+        </div>  
+    </div> 
+
+    <!-- HYPNOSCRYPT INITATIVE TWINERY -->
+     <div class="page project-page" id="hypnoscrypt-initiativePage">
+        <button class="back-btn" onclick="showPortfolio()">← BACK</button>
+        <div class="container">
+            <div class="project-header">
+                <h1 class="glitch" data-text="HYPNOSCRYPT INITIATIVE">HYPNOSCRYPT INITIATIVE</h1>
+                <div class="year">2024</div>
+                <div class="description">
+                    An absurdist non-linear narrative game exploring surveillance and state ethics in a campy speculative digital world.
+                </div>
+             </div>
+            <!-- Project description box -->
+            <div class="project-details">
+                <h3>About the Project</h3>
+                <p>Hypnoscrypt Initiative is a browser-based interactive fiction game created in Twine, blending speculative sci-fi with cryptic narrative design and an absurdist campy flare. Set in a fragmented digital dreamspace prison, the player navigates cryptic transmissions and disjointed consciousness, exploring themes of surveillance, and agency in a hyper-controlled and volatile system.</p>
+                <p> I designed and programmed the experience using Twine’s Harlowe format and custom JavaScript, combining nonlinear storytelling/narrative writing, game logic, and glitch aesthetic visual customisation to create a dark, immersive user experience focused on player agency. This project showcases my skills in nonlinear storytelling, interactive design, and worldbuilding through text.</p>
+                <li>All writing, design, and code by Dennis Ukandu.</li>
+                <li>Music by Leila Adil. <a href="https://soundcloud.com/r4444d1" target="_blank">(Soundcloud)</a></li>
+            </div>
+            <!-- Embedded game below -->
+            <div class="game-embed" style="margin-top:40px;">
+                <!-- The iframe via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CHINESE WHISPERS PROJECT PAGE -->
+    <div class="page project-page" id="chinese-whispersPage">
+        <button class="back-btn" onclick="showPortfolio()">← BACK</button>
+        <div class="container">
+            <div class="project-header">
+                <h1 class="glitch" data-text="CHINESE WHISPERS">CHINESE WHISPERS</h1>
+                <div class="year">2025</div>
+                <div class="description">
+                    A collaborative fashion project exploring cultural identity, heritage, and reinterpretation.
+                </div>
+            </div>
+            <div class="media-grid chinese-whispers-grid">
+                <!-- 1st landscape image -->
+                <div class="landscape-frame">
+                    <img src="images/chinese_whispers_4.JPG" alt="TRAILCAM 1" class="cw-media" data-cw-index="0">
+                </div>
+                <!-- Project details in between -->
+                <div class="cw-details">
+                    <h3>Model & Assistant – Chinese Whispers</h3>
+                    <p>I worked as a model and shoot assistant on Chinese Whispers, a graduate project by Theo Liu Coonan exploring themes of cultural distortion, memory, and identity.</p>
+                    <p>Inspired by his mixed Chinese-Irish heritage, Theo reimagined early 20th-century Chinese garments using experimental materials and intentionally flawed construction. The project examines how traditions can fade or become distorted over time.</p>
+                    <p>It was a thoughtful, visually striking collaboration, and I was proud to support Theo’s vision both in front of and behind the camera.</p>
+                    <br>
+                    <h4>Project by Theo Liu Coonan</h4>
+                    <ul>
+                        <li>Email: <a href="mailto:theoliucoonan@gmail.com">theoliucoonan@gmail.com</a></li>
+                        <li>Instagram: <a href="https://www.instagram.com/theo_coonan" target="_blank">@theo_coonan</a></li>
+                        <li>Website: <a href="https://theoliucoonan.myportfolio.com" target="_blank">theoliucoonan.myportfolio.com</a></li>
+                        <li>NCAD Graduate Showcase: <a href="https://2025.ncad.works/graduates/theo-liu-coonan" target="_blank">2025.ncad.works/theo-liu-coonan</a></li>
+                    </ul>
+                </div>
+                <!-- 2nd landscape image -->
+                <div class="landscape-frame">
+                    <img src="images/chinese_whispers_5.jpg" alt="TRAILCAM 2" class="cw-media" data-cw-index="1">
+                </div>
+                <!-- Four portrait images in a row -->
+                <div class="portrait-frame">
+                    <img src="images/chinese_whispers_2.png" alt="LOOK4-DENNIS-1" class="cw-media" data-cw-index="2">
+                </div>
+                <div class="portrait-frame">
+                    <img src="images/chinese_whispers_1.png" alt="LOOK4-DENNIS-2" class="cw-media" data-cw-index="3">
+                </div>
+                <div class="portrait-frame">
+                    <img src="images/chinese_whispers_6.jpg" alt="LOOK4-DENNIS-3" class="cw-media" data-cw-index="4">
+                </div>
+                <div class="portrait-frame">
+                    <img src="images/chinese_whispers_3.png" alt="LOOK4-DENNIS-4" class="cw-media" data-cw-index="5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SYNTHETIC SOUL PROJECT PAGE -->
+    <div class="page project-page" id="synthetic-soulPage">
+        <button class="back-btn" onclick="showPortfolio()">← BACK</button>
+        <div class="container">
+            <div class="project-header">
+                <h1 class="glitch" data-text="SYNTHETIC SOUL">SYNTHETIC SOUL</h1>
+                <div class="year">2023</div>
+                <div class="description">
+                    Conceptual fashion project exploring posthuman identity, myth, and emotion through sci-fi-inspired design.
+                </div>
+            </div>
+            <div class="media-grid synthetic-soul-grid">
+                <!-- 1st landscape image -->
+                <div class="landscape-frame">
+                    <img src="images/synth_soul_main.jpg" alt="Look 1" class="ss-media" data-ss-index="0">
+                </div>
+                <!-- Text box under image 1 -->
+                <div class="ss-details">
+                    <h3>Synthetic Soul – Collaborative Fashion Project, Moscow</h3>
+                        <p>While in Moscow, I collaborated with final-year fashion and photography students on <em>Synthetic Soul</em>—a conceptual fashion project inspired by <em>Blade Runner</em> and its philosophical themes.</p>
+                        <p>Synthetic Soul explored posthuman identity, machine lifeforms, and what it means to be human, drawing on mythology and sci-fi symbolism. As a <strong>model and assistant</strong>, I supported the creative development and final shoot, helping bring to life a narrative of decay, transformation, and synthetic emotion through styling, structure, and performance.</p>
+                        <br>
+                        <ul>
+                        <li>Project by: Eugene Petrov – <a href="https://www.instagram.com/bornfromcold" target="_blank">@bornfromcold</a></li>
+                        <li>Art Direction: Seva – <a href="https://www.instagram.com/sunny_on1y" target="_blank">@sunny_on1y</a></li>
+                        <li>Photography: Sophia Denisovna – <a href="https://www.instagram.com/conyaconyaconya" target="_blank">@conyaconyaconya</a></p></li>
+                        <li>HSE University Portfolio Page: <a href="https://portfolio.hse.ru/Project/180951#" target="_blank">hse.ru/Project/180951</a></li>
+                        </ul>
+                    </div>
+                <!-- 2nd landscape image -->
+                <div class="landscape-frame">
+                    <img src="images/synthetic_soul_1.jpg" alt="Look 2" class="ss-media" data-ss-index="1">
+                </div>
+                <!-- 3rd landscape image -->
+                <div class="landscape-frame">
+                    <img src="images/synthetic_soul_2.jpg" alt="Look 3" class="ss-media" data-ss-index="2">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEDONISM BROADCAST PROJECT PAGE -->
+    <div class="page project-page" id="hedonism-broadcastPage">
+        <button class="back-btn" onclick="showPortfolio()">← BACK</button>
+        <div class="container">
+            <div class="project-header">
+                <h1 class="glitch" data-text="WORLDWIDE HEDONISM BROADCAST">WORLDWIDE HEDONISM BROADCAST</h1>
+                <div class="year">2021</div>
+                <div class="description">
+                    An observational portrait series capturing the energy, excess, and intimacy of post-lockdown youth.
+                </div>
+            </div>
+
+            <div class="project-details">
+                <h3>Portraits in a Reopened World</h3>
+                <p>Worldwide Hedonism Broadcast is a digitally hand-drawn portrait series capturing the faces and energy of friends at the end of lockdown and the beginning of university life—a moment charged with freedom, indulgence, and emotional release.</p>
+                <p>Created in the wake of the pandemic, the series documents a group of creatively restless individuals navigating identity, connection, and excess in a newly reopened world. Each portrait focuses on personality and presence, blending observational drawing with expressive detail to reflect the intimacy and chaos of post-isolation youth culture.</p>
+            </div>
+
+            <div class="media-grid hedonism-portraits-grid">
+                <div class="media-item">
+                    <img src="images/portrait1.png" alt="Look 1" class="whb-media" data-whb-index="0">
+                </div>
+                <div class="media-item">
+                    <img src="images/portrait2.PNG" alt="Look 2" class="whb-media" data-whb-index="1">
+                </div>
+                <div class="media-item">
+                    <img src="images/portrait3.jpg" alt="Look 3" class="whb-media" data-whb-index="2">
+                </div>
+                <div class="media-item">
+                    <img src="images/portrait4.PNG" alt="Look 4" class="whb-media" data-whb-index="3">
+                </div>
+                <div class="media-item">
+                    <img src="images/portrait5.png" alt="Look 5" class="whb-media" data-whb-index="4">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Lightbox HTML -->
+     <div id="lightbox" style="display:none;">
+     <div id="lightbox-bg"></div>
+     <button id="lightbox-left">&#8592;</button>
+     <div id="lightbox-content"></div>
+     <button id="lightbox-right">&#8594;</button>
+     <button id="lightbox-close">&times;</button>
+    </div>
+    <script>
+
+    function hideAllPages() {
+        // Hide all project/content pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('visible');
+        });
+        // Hide the intro page if it exists
+        var intro = document.getElementById('introPage');
+        if (intro) {
+            intro.classList.add('hidden');
+        }
+        // Remove Hypnoscrypt game iframe if it exists
+        var hypnoEmbed = document.getElementById('hypnoscrypt-iframe');
+        if (hypnoEmbed && hypnoEmbed.parentNode) {
+            hypnoEmbed.parentNode.removeChild(hypnoEmbed);
+        }
+    }
+
+    function showProject(projectId) {
+        hideAllPages();
+        var projectPage = document.getElementById(projectId + 'Page');
+        if (projectPage) {
+            projectPage.classList.add('visible');
+            // Re-insert the iframe if this is the hypnoscrypt project
+            if (projectId === 'hypnoscrypt-initiative') {
+                var gameEmbed = projectPage.querySelector('.game-embed');
+                if (gameEmbed) {
+                    gameEmbed.innerHTML = '';
+                    var iframe = document.createElement('iframe');
+                    iframe.id = 'hypnoscrypt-iframe';
+                    // Add a cache-busting query string
+                    iframe.src = 'games/Hypnoscrypt_Initiative.html?cb=' + Date.now();
+                    iframe.width = '100%';
+                    iframe.height = '700';
+                    iframe.frameBorder = '0';
+                    iframe.allowFullscreen = true;
+                    iframe.style.background = '#111';
+                    iframe.style.border = '2px solid #333';
+                    iframe.style.borderRadius = '8px';
+                    gameEmbed.appendChild(iframe);
+                }
+            }
+        }
+    }
+
+    </script>
+    <script>
+        function showPortfolio() {
+            hideAllPages();
+            document.getElementById('portfolioPage').classList.add('visible');
+        }
+        // Advanced Scrambled Text Effect with Mouse Interaction
+        class InteractiveScrambledText {
+            constructor(element, options = {}) {
+                this.element = element;
+                this.originalText = element.textContent;
+                this.chars = options.scrambleChars || '.:';
+                this.radius = options.radius || 100;
+                this.duration = options.duration || 1200;
+                this.speed = options.speed || 0.5;
+                this.charElements = [];
+                this.activeAnimations = new Map();
+                
+                this.init();
+            }
+
+            init() {
+                // Split text into individual character spans
+                const text = this.originalText;
+                this.element.innerHTML = '';
+                
+                // ...inside InteractiveScrambledText.init()...
+                for (let i = 0; i < text.length; i++) {
+                  const char = text[i];
+                 if (char === ' ') {
+                // Add a real space as a text node
+                this.element.appendChild(document.createTextNode(' '));
+                } else {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.className = 'scramble-char';
+                    span.dataset.original = char;
+                    this.element.appendChild(span);
+                    this.charElements.push(span);
+                }
+            }
+
+                // Add mouse move listener
+                this.element.addEventListener('pointermove', (e) => this.handleMove(e));
+                this.element.addEventListener('mouseleave', () => this.resetAll());
+            }
+
+            handleMove(e) {
+                this.charElements.forEach((charEl, index) => {
+                    const rect = charEl.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const dx = e.clientX - centerX;
+                    const dy = e.clientY - centerY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.radius) {
+                        this.scrambleChar(charEl, distance);
+                    }
+                });
+            }
+
+            scrambleChar(charEl, distance) {
+                const originalChar = charEl.dataset.original;
+                if (originalChar === ' ') return;
+
+                // Clear existing animation
+                if (this.activeAnimations.has(charEl)) {
+                    clearTimeout(this.activeAnimations.get(charEl));
+                }
+
+                // Calculate intensity based on distance
+                const intensity = 1 - (distance / this.radius);
+                const scrambleDuration = this.duration * intensity;
+                const frameRate = 60;
+                const totalFrames = Math.floor((scrambleDuration / 1000) * frameRate);
+                
+                let currentFrame = 0;
+                
+                const animate = () => {
+                    if (currentFrame < totalFrames) {
+                        const progress = currentFrame / totalFrames;
+                        
+                        if (Math.random() < (1 - progress) * intensity) {
+                            charEl.textContent = this.getRandomChar();
+                        } else {
+                            charEl.textContent = originalChar;
+                        }
+                        
+                        currentFrame++;
+                        const timeout = setTimeout(animate, 1000 / (frameRate * this.speed));
+                        this.activeAnimations.set(charEl, timeout);
+                    } else {
+                        charEl.textContent = originalChar;
+                        this.activeAnimations.delete(charEl);
+                    }
+                };
+                
+                animate();
+            }
+
+            getRandomChar() {
+                return this.chars[Math.floor(Math.random() * this.chars.length)];
+            }
+
+            resetAll() {
+                this.charElements.forEach(charEl => {
+                    if (this.activeAnimations.has(charEl)) {
+                        clearTimeout(this.activeAnimations.get(charEl));
+                        this.activeAnimations.delete(charEl);
+                    }
+                    charEl.textContent = charEl.dataset.original;
+                });
+            }
+        }
+
+        // Simple hover-based scrambled text for titles
+        class HoverScrambledText {
+            constructor(element, options = {}) {
+                this.element = element;
+                this.originalText = element.textContent;
+                this.chars = options.chars || '!<>-_\\/[]{}—=+*^?#________';
+                this.duration = options.duration || 800;
+                this.isScrambling = false;
+            }
+
+            scramble() {
+                if (this.isScrambling) return;
+                this.isScrambling = true;
+
+                const text = this.originalText;
+                const length = text.length;
+                const totalSteps = 20;
+                let step = 0;
+
+                const scrambleInterval = setInterval(() => {
+                    let scrambledText = '';
+                    
+                    for (let i = 0; i < length; i++) {
+                        if (text[i] === ' ') {
+                            scrambledText += ' ';
+                        } else {
+                            const progress = step / totalSteps;
+                            const charProgress = Math.max(0, (progress * length) - i);
+                            
+                            if (charProgress >= 1) {
+                                scrambledText += text[i];
+                            } else if (charProgress > 0.3) {
+                                scrambledText += Math.random() < 0.7 ? text[i] : this.getRandomChar();
+                            } else {
+                                scrambledText += this.getRandomChar();
+                            }
+                        }
+                    }
+                    
+                    this.element.textContent = scrambledText;
+                    step++;
+                    
+                    if (step >= totalSteps) {
+                        clearInterval(scrambleInterval);
+                        this.element.textContent = text;
+                        this.isScrambling = false;
+                    }
+                }, this.duration / totalSteps);
+            }
+
+            getRandomChar() {
+                return this.chars[Math.floor(Math.random() * this.chars.length)];
+            }
+        }
+
+        // Initialize all scrambled text effects
+        function initScrambledText() {
+            // Interactive scrambling for body text
+            const bodyTexts = document.querySelectorAll('.bio, .project-description, .description, .project-details p, .cw-details p, .ss-details p');
+            bodyTexts.forEach(text => {
+                text.classList.add('interactive-text');
+                new InteractiveScrambledText(text, {
+                    radius: 80,
+                    duration: 1000,
+                    speed: 0.6,
+                    scrambleChars: '.:!<>-_'
+                });
+            });
+
+            // Hover scrambling for titles
+            const titles = document.querySelectorAll('.intro-title, .project-page h1, h1.glitch, .project-title');
+            titles.forEach(title => {
+                const scrambler = new HoverScrambledText(title, {
+                    duration: 1200,
+                    chars: '!<>-_\\/[]{}—=+*^?#________'
+                });
+                
+                title.addEventListener('mouseenter', () => scrambler.scramble());
+            });
+
+            // Interactive scrambling for subtitles
+            const subtitles = document.querySelectorAll('.intro-subtitle, .subtitle, .project-year');
+            subtitles.forEach(subtitle => {
+                new InteractiveScrambledText(subtitle, {
+                    radius: 60,
+                    duration: 800,
+                    speed: 0.8,
+                    scrambleChars: '.:_-'
+                });
+            });
+        }
+
+        // Original navigation functions
+
+        // Initialize scrambled text effects after DOM is loaded
+        document.addEventListener('DOMContentLoaded', initScrambledText);
+    
+    </script>
+    <script>
+    // Lightbox DOM elements
+        const lightbox = document.getElementById('lightbox');
+        const lightboxContent = document.getElementById('lightbox-content');
+        const lightboxLeft = document.getElementById('lightbox-left');
+        const lightboxRight = document.getElementById('lightbox-right');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxBg = document.getElementById('lightbox-bg');
+
+        let activeLightboxProject = null;
+
+        // FOREVERFUCK
+        const mediaItems = [
+            { type: "image", src: "images/foreverfuck2.png", alt: "Project Image" },
+            { type: "image", src: "images/foreverfuck8.jpg", alt: "Still 2" },
+            { type: "image", src: "images/foreverfuck5.jpg", alt: "Still 3" },
+            { type: "image", src: "images/foreverfuck4.jpg", alt: "Still 4" },
+            { type: "image", src: "images/foreverfuck6.jpg", alt: "Still 5" },
+            { type: "video", src: "videos/foreverfuck_vid.mp4", alt: "Video Slide" },
+            { type: "image", src: "images/against_transience.png", alt: "Poster" },
+        ];
+        let currentMediaIndex = 0;
+
+        function showLightbox(index) {
+            activeLightboxProject = 'foreverfuck';
+            currentMediaIndex = index;
+            lightboxContent.innerHTML = '';
+            const item = mediaItems[index];
+            if (item.type === "image") {
+                const img = document.createElement('img');
+                img.src = item.src;
+                img.alt = item.alt || "";
+                lightboxContent.appendChild(img);
+            } else if (item.type === "video") {
+                const video = document.createElement('video');
+                video.src = item.src;
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                video.controls = true;
+                video.style.maxWidth = '90vw';
+                video.style.maxHeight = '90vh';
+                lightboxContent.appendChild(video);
+            }
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function showPrev() {
+            let idx = (currentMediaIndex - 1 + mediaItems.length) % mediaItems.length;
+            showLightbox(idx);
+        }
+        function showNext() {
+            let idx = (currentMediaIndex + 1) % mediaItems.length;
+            showLightbox(idx);
+        }
+        document.querySelectorAll('#foreverfuckPage [data-ff-index]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.getAttribute('data-ff-index'));
+                showLightbox(idx);
+            });
+        });
+
+        // CHINESE WHISPERS
+        const cwMediaItems = [
+            { src: "images/chinese_whispers_4.JPG", alt: "TRAILCAM 1" },
+            { src: "images/chinese_whispers_5.jpg", alt: "TRAILCAM 2" },
+            { src: "images/chinese_whispers_2.png", alt: "LOOK4-DENNIS-1" },
+            { src: "images/chinese_whispers_1.png", alt: "LOOK4-DENNIS-2" },
+            { src: "images/chinese_whispers_6.jpg", alt: "LOOK4-DENNIS-3" },
+            { src: "images/chinese_whispers_3.png", alt: "LOOK4-DENNIS-4" }
+        ];
+        let currentCWIndex = 0;
+        function showCWLightbox(index) {
+            activeLightboxProject = 'chinese-whispers';
+            currentCWIndex = index;
+            lightboxContent.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = cwMediaItems[index].src;
+            img.alt = cwMediaItems[index].alt;
+            lightboxContent.appendChild(img);
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function showCWPrev() {
+            let idx = (currentCWIndex - 1 + cwMediaItems.length) % cwMediaItems.length;
+            showCWLightbox(idx);
+        }
+        function showCWNext() {
+            let idx = (currentCWIndex + 1) % cwMediaItems.length;
+            showCWLightbox(idx);
+        }
+        document.querySelectorAll('.cw-media').forEach(item => {
+            item.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-cw-index'));
+                showCWLightbox(idx);
+            });
+        });
+
+        // SYNTHETIC SOUL
+        const ssMediaItems = [
+            { src: "images/synth_soul_main.jpg", alt: "Look 1" },
+            { src: "images/synthetic_soul_1.jpg", alt: "Look 2" },
+            { src: "images/synthetic_soul_2.jpg", alt: "Look 3" }
+        ];
+        let currentSSIndex = 0;
+        function showSSLightbox(index) {
+            activeLightboxProject = 'synthetic-soul';
+            currentSSIndex = index;
+            lightboxContent.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = ssMediaItems[index].src;
+            img.alt = ssMediaItems[index].alt;
+            lightboxContent.appendChild(img);
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function showSSPrev() {
+            let idx = (currentSSIndex - 1 + ssMediaItems.length) % ssMediaItems.length;
+            showSSLightbox(idx);
+        }
+        function showSSNext() {
+            let idx = (currentSSIndex + 1) % ssMediaItems.length;
+            showSSLightbox(idx);
+        }
+        document.querySelectorAll('.ss-media').forEach(item => {
+            item.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-ss-index'));
+                showSSLightbox(idx);
+            });
+        });
+
+        // WHB
+        const whbMediaItems = [
+            { src: "images/portrait1.png", alt: "Look 1" },
+            { src: "images/portrait2.PNG", alt: "Look 2" },
+            { src: "images/portrait3.jpg", alt: "Look 3" },
+            { src: "images/portrait4.PNG", alt: "Look 4" },
+            { src: "images/portrait5.png", alt: "Look 5" }
+        ];
+        let currentWHBIndex = 0;
+        function showWHBLightbox(index) {
+            activeLightboxProject = 'whb';
+            currentWHBIndex = index;
+            lightboxContent.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = whbMediaItems[index].src;
+            img.alt = whbMediaItems[index].alt;
+            lightboxContent.appendChild(img);
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function showWHBPrev() {
+            let idx = (currentWHBIndex - 1 + whbMediaItems.length) % whbMediaItems.length;
+            showWHBLightbox(idx);
+        }
+        function showWHBNext() {
+            let idx = (currentWHBIndex + 1) % whbMediaItems.length;
+            showWHBLightbox(idx);
+        }
+        document.querySelectorAll('.whb-media').forEach(item => {
+            item.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-whb-index'));
+                showWHBLightbox(idx);
+            });
+        });
+
+        // LIGHTBOX NAVIGATION BUTTONS
+        lightboxLeft.addEventListener('click', function() {
+            if (activeLightboxProject === 'foreverfuck') showPrev();
+            else if (activeLightboxProject === 'chinese-whispers') showCWPrev();
+            else if (activeLightboxProject === 'synthetic-soul') showSSPrev();
+            else if (activeLightboxProject === 'whb') showWHBPrev();
+        });
+        lightboxRight.addEventListener('click', function() {
+            if (activeLightboxProject === 'foreverfuck') showNext();
+            else if (activeLightboxProject === 'chinese-whispers') showCWNext();
+            else if (activeLightboxProject === 'synthetic-soul') showSSNext();
+            else if (activeLightboxProject === 'whb') showWHBNext();
+        });
+        lightboxClose.addEventListener('click', hideLightbox);
+        lightboxBg.addEventListener('click', hideLightbox);
+
+        function hideLightbox() {
+            lightbox.style.display = 'none';
+            lightboxContent.innerHTML = '';
+            document.body.style.overflow = '';
+            activeLightboxProject = null;
+        }
+
+        // KEYBOARD NAVIGATION
+        document.addEventListener('keydown', function(e) {
+            if (lightbox.style.display === 'flex') {
+                if (e.key === 'ArrowLeft') {
+                    if (activeLightboxProject === 'foreverfuck') showPrev();
+                    else if (activeLightboxProject === 'chinese-whispers') showCWPrev();
+                    else if (activeLightboxProject === 'synthetic-soul') showSSPrev();
+                    else if (activeLightboxProject === 'whb') showWHBPrev();
+                }
+                if (e.key === 'ArrowRight') {
+                    if (activeLightboxProject === 'foreverfuck') showNext();
+                    else if (activeLightboxProject === 'chinese-whispers') showCWNext();
+                    else if (activeLightboxProject === 'synthetic-soul') showSSNext();
+                    else if (activeLightboxProject === 'whb') showWHBNext();
+                }
+                if (e.key === 'Escape') hideLightbox();
+            }
+        });
+    </script>
+</body>
+</html>
